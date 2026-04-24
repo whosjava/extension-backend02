@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import JSZip from 'jszip';
 import fs from 'fs';
@@ -26,6 +27,36 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+// Verify elit_ token and get discord_id
+async function verifyElitToken(token) {
+  if (!token?.startsWith('elit_')) return null;
+
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+  // Try using the RPC function first
+  try {
+    const { data, error } = await supabase.rpc('verify_discord_api_token', {
+      _token_hash: tokenHash
+    });
+
+    if (error || !data?.length) return null;
+    return data[0].discord_id;
+  } catch (e) {
+    console.log('RPC failed, trying direct query:', e);
+    
+    // Fallback to direct query
+    const { data, error } = await supabase
+      .from('discord_api_tokens')
+      .select('discord_id')
+      .eq('token_hash', tokenHash)
+      .eq('revoked', false)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data.discord_id;
+  }
+}
+
 // Health check
 app.get('/', (req, res) => {
   res.send('Extension Backend Running ✅');
@@ -47,23 +78,25 @@ app.put('/api/save-webhook', async (req, res) => {
   }
   
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const discord_id = await verifyElitToken(token);
     
-    if (authError || !user) {
+    if (!discord_id) {
       return res.status(401).json({ error: 'Invalid token' });
     }
     
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ discord_webhook: webhook })
-      .eq('user_id', user.id);
+      .eq('user_id', discord_id);
     
     if (updateError) {
+      console.error('Update error:', updateError);
       return res.status(500).json({ error: 'Failed to save webhook' });
     }
     
     return res.status(200).json({ success: true });
   } catch (error) {
+    console.error('Save webhook error:', error);
     return res.status(500).json({ error: error.message });
   }
 });
@@ -77,19 +110,24 @@ app.get('/api/generate-extension', async (req, res) => {
   }
   
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const discord_id = await verifyElitToken(token);
     
-    if (authError || !user) {
+    if (!discord_id) {
       return res.status(401).send('Invalid token');
     }
     
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('discord_webhook')
-      .eq('user_id', user.id)
+      .eq('user_id', discord_id)
       .single();
     
-    if (profileError || !profile || !profile.discord_webhook) {
+    if (profileError) {
+      console.error('Profile error:', profileError);
+      return res.status(500).send('Error fetching profile: ' + profileError.message);
+    }
+    
+    if (!profile || !profile.discord_webhook) {
       return res.status(400).send('No webhook configured. Please set your webhook in Settings first.');
     }
     
@@ -129,6 +167,7 @@ app.get('/api/generate-extension', async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="tiktok-growth-pro.zip"');
     res.send(zipBuffer);
   } catch (error) {
+    console.error('Generate extension error:', error);
     res.status(500).send('Error generating extension: ' + error.message);
   }
 });
