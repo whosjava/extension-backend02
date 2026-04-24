@@ -56,7 +56,7 @@ app.put('/api/save-webhook', async (req, res) => {
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ discord_webhook: webhook })
-      .eq('id', user.id);
+    .eq('user_id', user.id);
     
     if (updateError) {
       return res.status(500).json({ error: 'Failed to save webhook' });
