@@ -56,7 +56,7 @@ app.put('/api/save-webhook', async (req, res) => {
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ discord_webhook: webhook })
-    .eq('user_id', user.id);
+      .eq('user_id', user.id);
     
     if (updateError) {
       return res.status(500).json({ error: 'Failed to save webhook' });
@@ -86,7 +86,7 @@ app.get('/api/generate-extension', async (req, res) => {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('discord_webhook')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
     
     if (profileError || !profile || !profile.discord_webhook) {
