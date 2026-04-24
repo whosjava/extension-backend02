@@ -80,14 +80,18 @@ app.get('/api/generate-extension', async (req, res) => {
       .from('discord_verified_users')
       .select('discord_webhook')
       .eq('discord_id', discord_id)
-      .single();
+      .maybeSingle();
     
     if (discordError) {
       console.error('Discord user error:', discordError);
       return res.status(500).send('Error fetching user: ' + discordError.message);
     }
     
-    if (!discordUser || !discordUser.discord_webhook) {
+    if (!discordUser) {
+      return res.status(404).send('User not found. Please verify your Discord account first.');
+    }
+    
+    if (!discordUser.discord_webhook) {
       return res.status(400).send('No webhook configured. Please set your webhook in Settings → Webhook Configuration.');
     }
     
