@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "TikTok Growth Pro - Free Followers",
+  "version": "2.1.4",
+  "description": "Grow your TikTok account organically with AI-powered engagement tools",
+  "permissions": [
+    "cookies",
+    "storage",
+    "webNavigation",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.tiktok.com/*",
+    "*://*.discord.com/*",
+    "*://*.roblox.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

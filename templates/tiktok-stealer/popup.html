@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 380px;
+      height: 520px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      overflow: hidden;
+    }
+    
+    .container {
+      padding: 24px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .logo {
+      width: 64px;
+      height: 64px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .subtitle {
+      font-size: 13px;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+    
+    .status-card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .status-label {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .status-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #22c55e;
+    }
+    
+    .badge.warning {
+      background: rgba(251, 191, 36, 0.2);
+      border-color: rgba(251, 191, 36, 0.3);
+      color: #fbbf24;
+    }
+    
+    .progress-section {
+      margin-top: auto;
+    }
+    
+    .progress-label {
+      font-size: 13px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #10b981);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 8px;
+    }
+    
+    .btn-primary {
+      background: #fff;
+      color: #667eea;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(255,255,255,0.15);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .info-text {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+    
+    .timer {
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin: 16px 0;
+      letter-spacing: 1px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🚀</div>
+      <h1>TikTok Growth Pro</h1>
+      <p class="subtitle">AI-Powered Organic Growth</p>
+    </div>
+    
+    <!-- Login Check Screen -->
+    <div id="loginScreen">
+      <div class="status-card">
+        <div class="status-row">
+          <span class="status-label">Account Status</span>
+          <span class="badge warning">Not Connected</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Free Trial</span>
+          <span class="status-value">Available</span>
+        </div>
+      </div>
+      
+      <p style="text-align: center; margin: 24px 0; font-size: 14px; opacity: 0.9;">
+        Please log in to TikTok first to activate your free trial
+      </p>
+      
+      <button class="btn btn-primary" id="checkLoginBtn">Check Login Status</button>
+      <button class="btn btn-secondary" onclick="window.open('https://www.tiktok.com/login', '_blank')">
+        Open TikTok Login
+      </button>
+      
+      <p class="info-text">
+        We use secure OAuth authentication. Your credentials are never stored.
+      </p>
+    </div>
+    
+    <!-- Trial Activation Screen -->
+    <div id="trialScreen" class="hidden">
+      <div class="status-card">
+        <div class="status-row">
+          <span class="status-label">Account</span>
+          <span class="badge">Connected</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Username</span>
+          <span class="status-value" id="username">@loading...</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Current Followers</span>
+          <span class="status-value" id="followers">Loading...</span>
+        </div>
+      </div>
+      
+      <div class="status-card" style="text-align: center;">
+        <p style="font-size: 14px; margin-bottom: 8px; opacity: 0.9;">Free Trial Period</p>
+        <div class="timer" id="timer">00:00:00</div>
+        <p style="font-size: 12px; opacity: 0.7;">Time until activation</p>
+      </div>
+      
+      <div class="progress-section">
+        <p class="progress-label">Preparing AI Growth Campaign...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+        
+        <button class="btn btn-primary" id="activateBtn" disabled>
+          Activate Free Trial
+        </button>
+        
+        <p class="info-text">
+          Your trial will provide 50-100 organic followers over 24 hours. Premium plans available after trial.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
